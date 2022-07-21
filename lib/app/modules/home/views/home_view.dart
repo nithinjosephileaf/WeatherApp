@@ -1,27 +1,35 @@
 import 'package:flutter/material.dart';
-
-import 'package:get/get.dart';
-import 'package:page_view_indicators/circle_page_indicator.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:page_view_indicators/page_view_indicators.dart';
 import 'package:weather_app/app/custom_widgets/cloud_page.dart';
+import 'package:weather_app/app/data/weather.dart';
 import 'package:weather_app/app/modules/search/views/search_view.dart';
 import 'package:weather_app/app/values/colors.dart';
 
-import '../controllers/home_controller.dart';
+final currentPageNotifier = ValueNotifier<int>(0);
 
-class HomeView extends GetView<HomeController> {
+List<WeatherTable> weatherList() {
+  final weather = Hive.box<WeatherTable>("weather_box");
+  return weather.values.toList();
+}
+
+class HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    print("view recreated");
-    return
-      Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: SafeArea(
-          child: Column(
+    return SafeArea(
+      child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: Column(
             children: [
               GestureDetector(
-                onTap: () => {Get.toNamed("/search")},
+                onTap: () => {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SearchView()),
+                  )
+                },
                 child: Container(
-                  width: Get.width,
+                  width: MediaQuery.of(context).size.width,
                   margin: const EdgeInsets.fromLTRB(20, 5, 20, 5),
                   height: 46,
                   decoration: const BoxDecoration(
@@ -56,41 +64,25 @@ class HomeView extends GetView<HomeController> {
               ),
               _buildCircleIndicator(),
               Expanded(
-                // child: PageView(
-                //   onPageChanged: (int index) {
-                //     controller.currentPageNotifier.value = index;
-                //   },
-                //   children: const <Widget>[
-                //
-                //   ],
-                // ),
-                child: Obx(() {
-                  return PageView.builder(
+                  child: PageView.builder(
                       onPageChanged: (int index) {
-                        print(controller.list[index].location_name);
-                        controller.currentPageNotifier.value = index;
-                        controller.count.value = index;
-                        print(controller.count.value);
+                        currentPageNotifier.value = index;
                       },
-                      itemCount: controller.list.length,
+                      itemCount: weatherList().length,
                       itemBuilder: (BuildContext context, int pageIndex) {
-                        return CloudPageView(controller.list[pageIndex].location_name);
-                      });
-                }),
-              )
+                        return CloudPageView(weatherList()[pageIndex]);
+                      }))
             ],
-          ),
-        ));
+          )),
+    );
   }
 
   _buildCircleIndicator() {
     return Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Obx(() {
-          return CirclePageIndicator(
-            itemCount: controller.list.length,
-            currentPageNotifier: controller.currentPageNotifier,
-          );
-        }));
+        child: CirclePageIndicator(
+          itemCount: weatherList().length,
+          currentPageNotifier: currentPageNotifier,
+        ));
   }
 }

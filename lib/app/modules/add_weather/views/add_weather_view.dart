@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-
-import 'package:get/get.dart';
+import 'package:hive/hive.dart';
+import 'package:weather_app/app/data/weather.dart';
 
 import '../../../values/app_assets_source.dart';
 import '../../../values/colors.dart';
-import '../controllers/add_weather_controller.dart';
 
-class AddWeatherView extends GetView<AddWeatherController> {
+class AddWeatherView extends StatelessWidget {
+  final WeatherTable weatherTable;
+
+  AddWeatherView(this.weatherTable);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,14 +19,15 @@ class AddWeatherView extends GetView<AddWeatherController> {
           children: [
             Row(
               children: [
-                GestureDetector(
-                    onTap: Get.back, child: const Icon(Icons.arrow_back_ios)),
+                // GestureDetector(
+                //     onTap: Get.back, child: const Icon(Icons.arrow_back_ios)),
                 const Spacer(),
                 Directionality(
                   textDirection: TextDirection.rtl,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      controller.saveLocation();
+                      // controller.saveLocation();
+                      saveLocation(weatherTable);
                     },
                     label: const Text(
                       "Add to list",
@@ -49,7 +52,7 @@ class AddWeatherView extends GetView<AddWeatherController> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              controller.namecontroller.text,
+                              weatherTable.location_name,
                               style: const TextStyle(
                                   color: Color.fromRGBO(44, 44, 44, 1),
                                   fontSize: 30,
@@ -65,7 +68,7 @@ class AddWeatherView extends GetView<AddWeatherController> {
                             Image.asset(AppAssetSource.arrow)
                           ]),
                       Text(
-                        "${controller.degreecelsious.text}  \u2103",
+                        "${weatherTable.degree_celsious.toString()} \u2103",
                         style: const TextStyle(
                             fontSize: 30, fontFamily: "Poppins"),
                       ),
@@ -133,4 +136,9 @@ class AddWeatherView extends GetView<AddWeatherController> {
       ),
     ));
   }
+}
+
+void saveLocation(WeatherTable table) async {
+  final _weatherbox = Hive.box<WeatherTable>("weather_box");
+  await _weatherbox.add(table);
 }

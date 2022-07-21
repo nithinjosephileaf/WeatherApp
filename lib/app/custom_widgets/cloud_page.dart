@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:weather_app/app/modules/home/controllers/home_controller.dart';
+import 'package:weather_app/app/data/weather.dart';
 import 'package:weather_app/app/values/app_assets_source.dart';
 import 'package:weather_app/app/values/colors.dart';
 
 class CloudPageView extends StatelessWidget {
-  String location_name;
-   CloudPageView(this.location_name, {Key? key}) : super(key: key);
-  final controller=Get.find<HomeController>();
-
+  WeatherTable weatherTable;
+  CloudPageView(this.weatherTable, {Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -19,9 +16,8 @@ class CloudPageView extends StatelessWidget {
         Column(
           children: [
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-
-               Text(
-                 location_name,
+              Text(
+                weatherTable.location_name,
                 style: const TextStyle(
                     color: Color.fromRGBO(44, 44, 44, 1),
                     fontSize: 30,
@@ -36,9 +32,9 @@ class CloudPageView extends StatelessWidget {
               ),
               Image.asset(AppAssetSource.arrow)
             ]),
-            const Text(
-              "31  \u2103",
-              style: TextStyle(fontSize: 40, fontFamily: "Poppins"),
+            Text(
+              "${weatherTable.degree_celsious}  \u2103",
+              style: const TextStyle(fontSize: 40, fontFamily: "Poppins"),
             ),
           ],
         ),
@@ -76,7 +72,8 @@ class CloudPageView extends StatelessWidget {
                 ),
                 Column(
                   children: const [
-                    Text("% RAIN", style: TextStyle(color: AppColors.greyColor)),
+                    Text("% RAIN",
+                        style: TextStyle(color: AppColors.greyColor)),
                     Text("58%", style: TextStyle(color: AppColors.greyColor))
                   ],
                 ),
