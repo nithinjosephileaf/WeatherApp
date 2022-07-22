@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:weather_app/app/config/movie_state.dart';
+import 'package:weather_app/app/config/weather_state.dart';
 import 'package:weather_app/app/data/weather.dart';
 import 'package:weather_app/app/services/network/http_client.dart';
 
