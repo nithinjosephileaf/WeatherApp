@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:get/get.dart' as getx;
 import 'package:weather_app/app/services/network/endpoints.dart';
 import 'package:weather_app/app/services/network/exceptions.dart';
 
@@ -7,7 +6,9 @@ enum RequestType { get, post, patch, delete }
 
 abstract class HttpClient {
   Future<Response> request(EndPoint endPoint,
-      {Map<String, dynamic>? params, Map<String, dynamic>? queryParameters, String? id});
+      {Map<String, dynamic>? params,
+      Map<String, dynamic>? queryParameters,
+      String? id});
 }
 
 class HttpClientImpl implements HttpClient {
@@ -40,7 +41,9 @@ class HttpClientImpl implements HttpClient {
 
   @override
   Future<Response> request(EndPoint endPoint,
-      {Map<String, dynamic>? params, Map<String, dynamic>? queryParameters, String? id}) async {
+      {Map<String, dynamic>? params,
+      Map<String, dynamic>? queryParameters,
+      String? id}) async {
     // final authController = getx.Get.find<AuthBaseController>();
 
     // if (endPoint.shouldAddToken == true && authController.isAuthenticated) {
@@ -51,7 +54,7 @@ class HttpClientImpl implements HttpClient {
     _dio.options.headers = {};
 
     Response? response;
-    String url="";
+    String url = "";
     if (id != null) {
       url = endPoint.cleanUrlWith(id);
     } else {
@@ -60,13 +63,16 @@ class HttpClientImpl implements HttpClient {
     try {
       switch (endPoint.requestType) {
         case RequestType.get:
-          response = await _dio.get(url, queryParameters: params ?? queryParameters);
+          response =
+              await _dio.get(url, queryParameters: params ?? queryParameters);
           break;
         case RequestType.post:
-          response = await _dio.post(url, data: params, queryParameters: queryParameters);
+          response = await _dio.post(url,
+              data: params, queryParameters: queryParameters);
           break;
         case RequestType.patch:
-          response = await _dio.patch(url, data: params, queryParameters: queryParameters);
+          response = await _dio.patch(url,
+              data: params, queryParameters: queryParameters);
           break;
         case RequestType.delete:
           response = await _dio.delete(url, data: params);
@@ -78,16 +84,18 @@ class HttpClientImpl implements HttpClient {
         case DioErrorType.sendTimeout:
 
         case DioErrorType.receiveTimeout:
-          throw FetchDataException('Timeout Error\n\n${error.message}');
+          throw FetchDataException('Timeout Error\n\n${error.message}', 302);
         case DioErrorType.response:
           response = error.response; // If response is available.
           break;
         case DioErrorType.cancel:
-          throw FetchDataException('Request Cancelled\n\n${error.message}');
+          throw FetchDataException(
+              'Request Cancelled\n\n${error.message}', 402);
         case DioErrorType.other:
-          String message =
-              error.message.contains('SocketException') ? "No Internet Connection" : "Oops, Something went wrong";
-          throw FetchDataException('$message\n\n${error.message}');
+          String message = error.message.contains('SocketException')
+              ? "No  Connection"
+              : "Oops, Something went wrong";
+          throw FetchDataException('$message\n\n${error.message}', 300);
       }
     }
 
@@ -106,12 +114,14 @@ class HttpClientImpl implements HttpClient {
               : null;
     }
 
+    print("${response?.statusCode} response status code");
     switch (response?.statusCode) {
       case 200:
       case 201:
         // Null check for response.data
         if (response?.data == null) {
-          throw FetchDataException('Returned response data is null : ${response?.statusMessage}');
+          throw FetchDataException(
+              'Returned response data is null : ${response?.statusMessage}');
         }
 
         return response;

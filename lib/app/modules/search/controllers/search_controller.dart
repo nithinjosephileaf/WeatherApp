@@ -3,36 +3,29 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:weather_app/app/data/weather_response.dart';
-import 'package:weather_app/app/modules/home/controllers/home_controller.dart';
 import 'package:weather_app/app/services/network/endpoints.dart';
 import 'package:weather_app/app/services/network/exceptions.dart';
+import 'package:weather_app/app/services/network/http_client.dart';
 
 import '../../../../main.dart';
 import '../../../data/weather.dart';
-import 'package:weather_app/app/services/network/http_client.dart';
 
-import '../../../values/constants.dart';
-
-
-class SearchController extends GetxController with RouteAware{
+class SearchController extends GetxController with RouteAware {
   //TODO: Implement SearchController
 
   final count = 0.obs;
 
-   TextEditingController searchviewcontroller=TextEditingController();
+  TextEditingController searchviewcontroller = TextEditingController();
 
-  final _weatherbox= Hive.box<WeatherTable>("weather_box");
-  List<WeatherTable> weather_list=<WeatherTable>[].obs;
-
+  final _weatherbox = Hive.box<WeatherTable>("weather_box");
+  List<WeatherTable> weather_list = <WeatherTable>[].obs;
 
   @override
   void onInit() {
-
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      routeObserver.subscribe(this,GetPageRoute());
+      routeObserver.subscribe(this, GetPageRoute());
     });
     super.onInit();
-
   }
 
   @override
@@ -65,16 +58,12 @@ class SearchController extends GetxController with RouteAware{
     print("on ready");
   }
 
-
-
   @override
-  void onClose() {
-
-  }
+  void onClose() {}
   void increment() => count.value++;
 
-  List<WeatherTable> getAllData(){
-    List<WeatherTable> list= _weatherbox.values.toList();
+  List<WeatherTable> getAllData() {
+    List<WeatherTable> list = _weatherbox.values.toList();
     print(list.length);
 
     return list;
@@ -91,23 +80,21 @@ class SearchController extends GetxController with RouteAware{
   void getWeatherData() async {
     EasyLoading.show();
     weather_list.clear();
-   final httpclient=Get.find<HttpClient>();
-   try{
-     final response= await httpclient.request(EndPoint.getWeather,queryParameters: {
-       "q":searchviewcontroller.text,"APPID":"e94a847d02990cf4d427631ea8014314"
+    final httpclient = Get.find<HttpClient>();
+    try {
+      final response = await httpclient.request(EndPoint.getWeather,
+          queryParameters: {
+            "q": searchviewcontroller.text,
+            "APPID": "e94a847d02990cf4d427631ea8014314"
+          });
+      final data = WeatherResponse.fromJson(response.data);
 
-     });
-     final  data = WeatherResponse.fromJson(response.data);
-
-     weather_list.add(WeatherTable(data.name.toString(),data.wind!.deg!.toDouble()));
-     EasyLoading.dismiss();
-
-   }on AppException  catch(e){
-     weather_list.clear();
-     EasyLoading.dismiss();
-     return null;
-   }
-
+      weather_list
+          .add(WeatherTable(data.name.toString(), data.wind!.deg!.toDouble()));
+      EasyLoading.dismiss();
+    } on AppException catch (e) {
+      EasyLoading.dismiss();
+      return null;
+    }
   }
-
 }
